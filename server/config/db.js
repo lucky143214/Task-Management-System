@@ -1,64 +1,19 @@
 const { Sequelize } = require("sequelize");
-const mysql2 = require("mysql2");
-const { dbHost, dbUserName, dbPass, dbName, dbPort } = require("../secret");
+require("dotenv").config();
 
-// ============ for MySQL with Sequelize Connetion ============
-const sequelize = new Sequelize({
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: "mysql",
-  dialectModule: mysql2,
-  host: dbHost,
-  port: dbPort,
-  username: dbUserName,
-  password: dbPass,
-  database: dbName,
-  dialectOptions: {
-    ssl: dbHost !== "localhost" ? { rejectUnauthorized: false } : false,
-  },
+  logging: false, // set true if you want to see SQL queries
 });
-
-// Create the database if it doesn't exist
-const createDatabase = async () => {
-  const connection = mysql2.createConnection({
-    host: dbHost,
-    port: dbPort,
-    user: dbUserName,
-    password: dbPass,
-  });
-
-  try {
-    await connection
-      .promise()
-      .query(`CREATE DATABASE IF NOT EXISTS ${dbName};`);
-    console.log("Database created successfully or already exists.");
-  } catch (error) {
-    console.error("Error creating database:", error);
-  } finally {
-    connection.end();
-  }
-};
 
 const connectDB = async () => {
   try {
-    // Create the database if it doesn't exist
-    await createDatabase();
-
-    // Use the created database for Sequelize connection
-    sequelize.options.database = dbName;
-
-    // Try to authenticate
     await sequelize.authenticate();
-    console.log("Database connection has been established successfully.");
-
-    // Try to synchronize the User model with the database
-    try {
-      await sequelize.sync({ force: false }); // Set force to true to drop and recreate the table
-      console.log("Model synchronized with database");
-    } catch (error) {
-      console.error("Database synchronization error:", error.toString());
-    }
-  } catch (error) {
-    console.error("Unable to connect to the database:", error.toString());
-    sequelize.close();
+    console.log("✅ Connected to Railway MySQL!");
+  } catch (err) {
+    console.error("❌ Database connection failed:", err);
+    process.exit(1);
   }
 };
-module.exports = { connectDB, sequelize };
+
+module.exports = { sequelize, connectDB };

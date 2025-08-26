@@ -12,46 +12,23 @@ const User = sequelize.define("users", {
   name: {
     type: DataTypes.STRING,
     allowNull: false,
-    trim: true,
     validate: {
-      notNull: {
-        msg: "User name is required",
-      },
-      len: {
-        args: [3, 40],
-        msg: "Name must be 3 to 40 characters",
-      },
+      notNull: { msg: "User name is required" },
+      len: { args: [3, 40], msg: "Name must be 3 to 40 characters" },
     },
   },
   email: {
     type: DataTypes.STRING,
-    allowNull: [false, "Email is required"],
-    validate: {
-      isEmail: {
-        msg: "Please enter a valid Email address",
-      },
-      isLowercase: true,
-    },
-    unique: {
-      args: true,
-      msg: "Email already exists",
-    },
+    allowNull: false,
+    validate: { isEmail: { msg: "Please enter a valid Email address" }, isLowercase: true },
+    unique: { args: true, msg: "Email already exists" },
   },
   password: {
     type: DataTypes.STRING,
-    allowNull: [false, "Password is required"],
-    trim: true,
-    validate: {
-      min: {
-        args: 8,
-        msg: "Password length must be more than 8 characters",
-      },
-    },
+    allowNull: false,
+    validate: { min: { args: 8, msg: "Password length must be more than 8 characters" } },
     set(value) {
-      this.setDataValue(
-        "password",
-        bcrypt.hashSync(value, bcrypt.genSaltSync(10))
-      );
+      this.setDataValue("password", bcrypt.hashSync(value, bcrypt.genSaltSync(10)));
     },
   },
   isAdmin: {
