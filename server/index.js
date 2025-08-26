@@ -1,27 +1,33 @@
-// index.js
+// app.js
 
-const app = require("./app");
-const { connectDB, sequelize } = require("./config/db");
+const express = require("express");
+const cors = require("cors");
 
-// Use SERVER_PORT from env or fallback to 5100
-const SERVER_PORT = process.env.SERVER_PORT || 5100;
+const app = express();
 
-const startServer = async () => {
-  try {
-    // Connect to database
-    await connectDB();
+// Allow multiple frontend URLs
+const allowedOrigins = [
+  "https://task-management-system-beta-orpin.vercel.app",
+  "https://task-management-system-flax.vercel.app"
+];
 
-    // Sync models (creates tables if not exist)
-    await sequelize.sync({ alter: true });
+app.use(cors({
+  origin: function(origin, callback){
+    // allow requests with no origin (like Postman)
+    if(!origin) return callback(null, true);
 
-    // Start server
-    app.listen(SERVER_PORT, () => {
-      console.log(`🚀 Server is running on http://localhost:${SERVER_PORT}`);
-    });
-  } catch (err) {
-    console.error("❌ Failed to start server:", err);
-    process.exit(1);
-  }
-};
+    if(allowedOrigins.indexOf(origin) === -1){
+      const msg = "The CORS policy for this site does not allow access from the specified Origin.";
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true
+}));
 
-startServer();
+app.use(express.json());
+
+// Your routes here
+// app.use("/api/auth", authRoutes);
+
+module.exports = app;
