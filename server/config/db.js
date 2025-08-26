@@ -1,10 +1,16 @@
+// config/db.js
+
 const { Sequelize } = require("sequelize");
 require("dotenv").config();
 
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
-  dialect: "mysql",
-  logging: false, // set true if you want to see SQL queries
-});
+// Use DATABASE_URL from Railway, or fallback to local DB for development
+const sequelize = new Sequelize(
+  process.env.DATABASE_URL || "mysql://root:password@localhost:3306/task_management_system_test",
+  {
+    dialect: "mysql",
+    logging: false, // set to true if you want to see SQL queries
+  }
+);
 
 const connectDB = async () => {
   try {
